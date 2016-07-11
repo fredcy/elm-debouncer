@@ -1,15 +1,29 @@
 module Debounce exposing (Model, Msg(Change), init, update, settled)
 
-import Basics.Extra exposing (never)
+{-|
+This provides a component that can "debounce" a changing value.
+
+This implementation differs from others in attempting to minimize the number of
+`update` calls by using `Process.sleep` to manage the settling time.
+
+# Types
+@docs Model, Msg(Change)
+
+# Update
+@docs init, update
+
+# Read
+@docs settled
+
+-}
+
 import Process
 import Task
 import Time exposing (Time)
 
-{-|
-This provides a component that can "debounce" a changing value.
+
+{-| Debouncer model
 -}
-
-
 type alias Model datatype =
     { data : datatype
     , settled : datatype
@@ -26,6 +40,8 @@ init settleTime val =
     { data = val, settled = val, sleepCount = 0, settleTime = settleTime }
 
 
+{-| Use `Change` message pass new value to debouncer.
+-}
 type Msg datatype
     = Change datatype
     | Timeout Int
@@ -58,3 +74,8 @@ update msg model =
             else
                 -- an earlier timer expired, so input not yet settled
                 model ! []
+
+
+never : Never -> a
+never x =
+    never x
