@@ -1,19 +1,29 @@
-module Debounce exposing (..)
+module Debounce exposing (Model, Msg(Change), init, update, settled)
 
 import Basics.Extra exposing (never)
 import Process
 import Task
+import Time exposing (Time)
+
+{-|
+This provides a component that can "debounce" a changing value.
+-}
 
 
 type alias Model datatype =
     { data : datatype
+    , settled : datatype
     , sleepCount : Int
+    , settleTime : Time
     }
 
 
-init : datatype -> Model datatype
-init val =
-    { data = val, sleepCount = 0 }
+{-| Initialize the debouncer with the initial settled value and the time to wait
+for changing values to settle.
+-}
+init : Time -> datatype -> Model datatype
+init settleTime val =
+    { data = val, settled = val, sleepCount = 0, settleTime = settleTime }
 
 
 type Msg datatype
@@ -21,7 +31,16 @@ type Msg datatype
     | Timeout Int
 
 
-update : Msg datatype -> Model datatype -> ( Model datatype, Cmd (Msg datatype), Maybe datatype )
+{-| Access the settled value.
+-}
+settled : Model datatype -> datatype
+settled model =
+    model.settled
+
+
+{-| Update the debouncer as a typical TEA component.
+-}
+update : Msg datatype -> Model datatype -> ( Model datatype, Cmd (Msg datatype) )
 update msg model =
     case msg of
         Change data' ->
@@ -29,16 +48,13 @@ update msg model =
                 count' =
                     model.sleepCount + 1
             in
-                ( { model | data = data', sleepCount = count' }
-                , Process.sleep 500 |> Task.perform never (always (Timeout count'))
-                , Nothing
-                )
+                { model | data = data', sleepCount = count' }
+                    ! [ Process.sleep model.settleTime |> Task.perform never (always (Timeout count')) ]
 
         Timeout count ->
             if count == model.sleepCount then
-                ( { model | sleepCount = 0 }
-                , Cmd.none
-                , Just model.data
-                )
+                -- most recent timer has expired, so consider the value settled
+                { model | sleepCount = 0, settled = model.data } ! []
             else
-                ( model, Cmd.none, Nothing )
+                -- an earlier timer expired, so input not yet settled
+                model ! []

@@ -8,7 +8,6 @@ import Html.Events as Html
 
 type alias Model =
     { rawInput : String
-    , debouncedInput : String
     , debouncer : Debounce.Model String
     }
 
@@ -29,7 +28,7 @@ main =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" "" (Debounce.init ""), Cmd.none )
+    ( Model "" (Debounce.init 500 ""), Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -37,7 +36,7 @@ update msg model =
     case msg |> Debug.log "msg" of
         Input str ->
             let
-                ( debouncer', cmd, _ ) =
+                ( debouncer', cmd ) =
                     Debounce.update (Debounce.Change str) model.debouncer
             in
                 { model | rawInput = str, debouncer = debouncer' }
@@ -45,13 +44,10 @@ update msg model =
 
         DebouncerMsg dmsg ->
             let
-                ( debouncer', cmd, debouncedMaybe ) =
+                ( debouncer', cmd ) =
                     Debounce.update dmsg model.debouncer
-
-                debouncedInput' =
-                    Maybe.withDefault model.debouncedInput debouncedMaybe
             in
-                { model | debouncer = debouncer', debouncedInput = debouncedInput' }
+                { model | debouncer = debouncer' }
                     ! [ Cmd.map DebouncerMsg cmd ]
 
 
@@ -61,7 +57,9 @@ view model =
         [ Html.h3 [] [ Html.text "Input here" ]
         , Html.input [ Html.onInput Input ] []
         , Html.h3 [] [ Html.text "Debounced value" ]
-        , Html.div [] [ Html.text model.debouncedInput ]
+        , Html.div [] [ Html.text model.debouncer.settled ]
+        , Html.h3 [] [ Html.text "Model" ]
+        , Html.div [] [ Html.text <| toString model ]
         ]
 
 
