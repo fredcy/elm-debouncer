@@ -56,7 +56,7 @@ settled model =
 
 {-| Update the debouncer as a typical TEA component.
 -}
-update : Msg datatype -> Model datatype -> ( Model datatype, Cmd (Msg datatype) )
+update : Msg datatype -> Model datatype -> ( Model datatype, Cmd (Msg datatype), Maybe datatype )
 update msg model =
     case msg of
         Change data' ->
@@ -64,16 +64,21 @@ update msg model =
                 count' =
                     model.sleepCount + 1
             in
-                { model | data = data', sleepCount = count' }
-                    ! [ Process.sleep model.settleTime |> Task.perform never (always (Timeout count')) ]
+                ( { model | data = data', sleepCount = count' }
+                , Process.sleep model.settleTime |> Task.perform never (always (Timeout count'))
+                , Nothing
+                )
 
         Timeout count ->
             if count == model.sleepCount then
                 -- most recent timer has expired, so consider the value settled
-                { model | sleepCount = 0, settled = model.data } ! []
+                ( { model | sleepCount = 0, settled = model.data }
+                , Cmd.none
+                , Just model.data
+                )
             else
                 -- an earlier timer expired, so input not yet settled
-                model ! []
+                ( model, Cmd.none, Nothing )
 
 
 never : Never -> a

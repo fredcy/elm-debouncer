@@ -8,6 +8,7 @@ import Html.Events as Html
 
 type alias Model =
     { rawInput : String
+    , debouncedInput : String
     , debouncer : Debounce.Model String
     }
 
@@ -22,33 +23,42 @@ main =
         { init = init
         , update = update
         , view = view
-        , subscriptions = subscriptions
+        , subscriptions = always Sub.none
         }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" (Debounce.init 500 ""), Cmd.none )
+    ( Model "" "" (Debounce.init 500 ""), Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg |> Debug.log "msg" of
         Input str ->
-            let
-                ( debouncer', cmd ) =
-                    Debounce.update (Debounce.Change str) model.debouncer
-            in
-                { model | rawInput = str, debouncer = debouncer' }
-                    ! [ Cmd.map DebouncerMsg cmd ]
+            -- save raw input and then inform debouncer of change
+            { model | rawInput = str }
+                |> updateDebouncer (Debounce.Change str)
 
         DebouncerMsg dmsg ->
-            let
-                ( debouncer', cmd ) =
-                    Debounce.update dmsg model.debouncer
-            in
-                { model | debouncer = debouncer' }
-                    ! [ Cmd.map DebouncerMsg cmd ]
+            updateDebouncer dmsg model
+
+
+{-| Update main model given a Debounce.Msg. This is standard component-update
+stuff, plus checking the additional return value from Debounce.update for
+indication that the value has settled.
+-}
+updateDebouncer : Debounce.Msg String -> Model -> ( Model, Cmd Msg )
+updateDebouncer dMsg model =
+    let
+        ( debouncer', cmd, settledMaybe ) =
+            Debounce.update dMsg model.debouncer
+
+        debouncedInput' =
+            settledMaybe |> Maybe.withDefault model.debouncedInput
+    in
+        { model | debouncer = debouncer', debouncedInput = debouncedInput' }
+            ! [ Cmd.map DebouncerMsg cmd ]
 
 
 view : Model -> Html.Html Msg
@@ -57,12 +67,5 @@ view model =
         [ Html.h3 [] [ Html.text "Input here" ]
         , Html.input [ Html.onInput Input ] []
         , Html.h3 [] [ Html.text "Debounced value" ]
-        , Html.div [] [ Html.text model.debouncer.settled ]
-        , Html.h3 [] [ Html.text "Model" ]
-        , Html.div [] [ Html.text <| toString model ]
+        , Html.div [] [ Html.text model.debouncedInput ]
         ]
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
