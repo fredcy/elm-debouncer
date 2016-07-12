@@ -46,7 +46,7 @@ update msg model =
 
 {-| Update main model given a Debounce.Msg. This is standard component-update
 stuff, plus checking the additional return value from Debounce.update for
-indication that the value has settled.
+notification that the value has settled.
 -}
 updateDebouncer : Debounce.Msg String -> Model -> ( Model, Cmd Msg )
 updateDebouncer dMsg model =
