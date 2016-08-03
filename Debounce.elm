@@ -13,7 +13,7 @@ function's return value provides the notification to the parent of the settled
 value. It's also possible to poll the settled value.
 
 # Types
-@docs Model, Msg(Change)
+@docs Model, Msg
 
 # Update
 @docs init, update
