@@ -2,7 +2,6 @@ module Main exposing (main)
 
 import Debounce
 import Html
-import Html.App
 import Html.Events as Html
 
 
@@ -19,7 +18,7 @@ type Msg
 
 
 main =
-    Html.App.program
+    Html.program
         { init = init
         , update = update
         , view = view
@@ -51,13 +50,13 @@ notification that the value has settled.
 updateDebouncer : Debounce.Msg String -> Model -> ( Model, Cmd Msg )
 updateDebouncer dMsg model =
     let
-        ( debouncer', cmd, settledMaybe ) =
+        ( debouncer_, cmd, settledMaybe ) =
             Debounce.update dMsg model.debouncer
 
-        debouncedInput' =
+        debouncedInput_ =
             settledMaybe |> Maybe.withDefault model.debouncedInput
     in
-        { model | debouncer = debouncer', debouncedInput = debouncedInput' }
+        { model | debouncer = debouncer_, debouncedInput = debouncedInput_ }
             ! [ Cmd.map DebouncerMsg cmd ]
 
 

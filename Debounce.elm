@@ -68,13 +68,13 @@ final tuple element that is `Nothing` while the value is still changing and
 update : Msg datatype -> Model datatype -> ( Model datatype, Cmd (Msg datatype), Maybe datatype )
 update msg model =
     case msg of
-        Change data' ->
+        Change data_ ->
             let
-                count' =
+                count_ =
                     model.sleepCount + 1
             in
-                ( { model | data = data', sleepCount = count' }
-                , Process.sleep model.settleTime |> Task.perform never (always (Timeout count'))
+                ( { model | data = data_, sleepCount = count_ }
+                , Process.sleep model.settleTime |> Task.perform (always (Timeout count_))
                 , Nothing
                 )
 
