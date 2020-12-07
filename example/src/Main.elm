@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Browser
 import Debounce
 import Html
 import Html.Events as Html
@@ -18,16 +19,16 @@ type Msg
 
 
 main =
-    Html.program
+    Browser.element
         { init = init
         , update = update
         , view = view
-        , subscriptions = always Sub.none
+        , subscriptions = \_ -> Sub.none
         }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : () -> ( Model, Cmd Msg )
+init flags =
     ( Model "" "" (Debounce.init 500 ""), Cmd.none )
 
 

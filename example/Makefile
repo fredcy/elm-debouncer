@@ -1,3 +1,3 @@
-elm.js: Main.elm ../Debounce.elm
-	elm make Main.elm --output elm.js
+elm.js: src/Main.elm ../Debounce.elm
+	elm make src/Main.elm --output elm.js
 
