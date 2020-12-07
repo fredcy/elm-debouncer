@@ -1,8 +1,10 @@
-module Debounce exposing (Model, Msg(Change), init, update, settled)
+module Debounce exposing
+    ( Model, Msg(..)
+    , init, update
+    , settled
+    )
 
-{-|
-
-This provides a component that can "debounce" a changing value: monitor a
+{-| This provides a component that can "debounce" a changing value: monitor a
 time-varying sequence of values and output the latest value every time there is
 no further change for some minimum interval.
 
@@ -12,13 +14,19 @@ interval on every fine-grained tick). An added tuple element in the `update`
 function's return value provides the notification to the parent of the settled
 value. It's also possible to poll the settled value.
 
+
 # Types
+
 @docs Model, Msg
 
+
 # Update
+
 @docs init, update
 
+
 # Read
+
 @docs settled
 
 -}
@@ -73,10 +81,10 @@ update msg model =
                 count_ =
                     model.sleepCount + 1
             in
-                ( { model | data = data_, sleepCount = count_ }
-                , Process.sleep model.settleTime |> Task.perform (always (Timeout count_))
-                , Nothing
-                )
+            ( { model | data = data_, sleepCount = count_ }
+            , Process.sleep model.settleTime |> Task.perform (always (Timeout count_))
+            , Nothing
+            )
 
         Timeout count ->
             if count == model.sleepCount then
@@ -85,6 +93,7 @@ update msg model =
                 , Cmd.none
                 , Just model.data
                 )
+
             else
                 -- an earlier timer expired, so input not yet settled
                 ( model, Cmd.none, Nothing )

@@ -56,8 +56,9 @@ updateDebouncer dMsg model =
         debouncedInput_ =
             settledMaybe |> Maybe.withDefault model.debouncedInput
     in
-        { model | debouncer = debouncer_, debouncedInput = debouncedInput_ }
-            ! [ Cmd.map DebouncerMsg cmd ]
+    ( { model | debouncer = debouncer_, debouncedInput = debouncedInput_ }
+    , Cmd.map DebouncerMsg cmd
+    )
 
 
 view : Model -> Html.Html Msg
