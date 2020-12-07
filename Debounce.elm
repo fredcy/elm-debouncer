@@ -33,7 +33,6 @@ value. It's also possible to poll the settled value.
 
 import Process
 import Task
-import Time exposing (Time)
 
 
 {-| Debouncer model. Each instance handles a single time-varying sequence of the
@@ -43,14 +42,14 @@ type alias Model datatype =
     { data : datatype
     , settled : datatype
     , sleepCount : Int
-    , settleTime : Time
+    , settleTime : Float
     }
 
 
 {-| Initialize the debouncer with the time to wait for changing values to settle
 and the initial settled value.
 -}
-init : Time -> datatype -> Model datatype
+init : Float -> datatype -> Model datatype
 init settleTime val =
     { data = val, settled = val, sleepCount = 0, settleTime = settleTime }
 
