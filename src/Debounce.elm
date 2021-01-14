@@ -46,8 +46,8 @@ type alias Model datatype =
     }
 
 
-{-| Initialize the debouncer with the time to wait for changing values to settle
-and the initial settled value.
+{-| Initialize the debouncer with the time interval (in milliseconds) to wait
+for changing values to settle and the initial settled value.
 -}
 init : Float -> datatype -> Model datatype
 init settleTime val =
